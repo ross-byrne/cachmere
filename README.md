@@ -5,23 +5,14 @@
 
 A caching solution for Gleam web apps, designed to be used with Wisp.
 
-```sh
-gleam add cachmere@1
-```
-```gleam
-import cachmere
+Currently a work-in-progress. Breaking changes may be made to API.
 
-pub fn main() {
-  // TODO: An example of the project in use
-}
-```
-
-Further documentation can be found at <https://hexdocs.pm/cachmere>.
+## Roadmap
+- [x] Add response header control, to allow for browser caching of assets
+- [ ] Add support for ETags
 
 ## Development
 ```sh
 mise up # install development environment dependencies
-
-gleam run   # Run the project
 gleam test  # Run the tests
 ```
