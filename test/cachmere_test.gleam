@@ -121,7 +121,11 @@ pub fn serve_static_with_default_test() {
       request,
       under: "/stuff",
       from: "./",
-      options: cachmere.ServeStaticOptions([], []),
+      options: cachmere.ServeStaticOptions(
+        etags: False,
+        response_headers: [],
+        file_types: [],
+      ),
     )
     wisp.ok()
   }
@@ -177,9 +181,11 @@ pub fn serve_static_with_applies_to_correct_file_test() {
       request,
       under: "/stuff",
       from: "./",
-      options: cachmere.ServeStaticOptions([#("cache-control", "immutable")], [
-        "txt", "json",
-      ]),
+      options: cachmere.ServeStaticOptions(
+        etags: False,
+        response_headers: [#("cache-control", "immutable")],
+        file_types: ["txt", "json"],
+      ),
     )
     wisp.ok()
   }
@@ -238,9 +244,11 @@ pub fn serve_static_with_applies_to_correct_file_test() {
 pub fn default_cache_settings_test() {
   let result = cachmere.default_cache_settings()
   let expected =
-    cachmere.ServeStaticOptions(file_types: ["js", "css"], response_headers: [
-      #("cache-control", "max-age=31536000, immutable"),
-    ])
+    cachmere.ServeStaticOptions(
+      etags: False,
+      file_types: ["js", "css"],
+      response_headers: [#("cache-control", "max-age=31536000, immutable")],
+    )
 
   should.equal(result, expected)
 }

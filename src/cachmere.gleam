@@ -20,6 +20,7 @@ import wisp.{type Request, type Response, File, response}
 ///
 pub type ServeStaticOptions {
   ServeStaticOptions(
+    etags: Bool,
     response_headers: List(#(String, String)),
     file_types: List(String),
   )
@@ -36,7 +37,7 @@ pub type ServeStaticOptions {
 /// ```
 ///
 pub fn default_cache_settings() -> ServeStaticOptions {
-  ServeStaticOptions(file_types: ["js", "css"], response_headers: [
+  ServeStaticOptions(etags: False, file_types: ["js", "css"], response_headers: [
     #("cache-control", "max-age=31536000, immutable"),
   ])
 }
@@ -93,7 +94,11 @@ pub fn serve_static(
     req,
     under: prefix,
     from: directory,
-    options: ServeStaticOptions(file_types: [], response_headers: []),
+    options: ServeStaticOptions(
+      etags: False,
+      file_types: [],
+      response_headers: [],
+    ),
     next: handler,
   )
 }
