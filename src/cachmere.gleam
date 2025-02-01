@@ -1,7 +1,6 @@
 import cachmere/internal
 import gleam/http
 import gleam/http/response
-import gleam/int
 import gleam/io
 import gleam/list
 import gleam/result
@@ -171,12 +170,8 @@ pub fn serve_static_with(
             |> response.set_body(File(path))
 
           // TESTING: test hashing file size and updated_at
-          let assert Ok(file_info) = simplifile.file_info(path)
-          let micro_seconds = file_info.mtime_seconds * 1_000_000
-          let etag =
-            int.to_base16(file_info.size) <> "-" <> int.to_base16(micro_seconds)
-
-          io.println("etag: " <> etag)
+          let assert Ok(etag) = internal.generate_etag(path)
+          io.debug(etag)
 
           // check if file type is in options
           case list.contains(options.file_types, file_type) {
