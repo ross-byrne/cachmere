@@ -171,7 +171,7 @@ pub fn serve_static_with(
             |> response.set_body(File(path))
 
           // Check if file type is in options
-          case list.contains(options.file_types, file_type) {
+          let resp = case list.contains(options.file_types, file_type) {
             True -> internal.set_headers(options.response_headers, resp)
             False -> resp
           }
