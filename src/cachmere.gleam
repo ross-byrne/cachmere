@@ -1,8 +1,9 @@
 import cachmere/internal
 import gleam/http
+import gleam/http/request
 import gleam/http/response
-import gleam/io
 import gleam/list
+import gleam/order
 import gleam/result
 import gleam/string
 import marceau
@@ -169,13 +170,30 @@ pub fn serve_static_with(
             |> response.set_header("content-type", content_type)
             |> response.set_body(File(path))
 
-          // TESTING: test hashing file size and updated_at
-          let assert Ok(etag) = internal.generate_etag(path)
-          io.debug(etag)
-
-          // check if file type is in options
+          // Check if file type is in options
           case list.contains(options.file_types, file_type) {
             True -> internal.set_headers(options.response_headers, resp)
+            False -> resp
+          }
+
+          // Handle etag generation
+          case options.etags {
+            True -> {
+              let assert Ok(etag) = internal.generate_etag(path)
+              case request.get_header(req, "if-none-match") {
+                // Compare old etag to current one
+                Ok(old_etag) -> {
+                  case string.compare(old_etag, etag) {
+                    // etags match, return status 304
+                    order.Eq -> wisp.response(304)
+                    // didn't match, return file with new etag
+                    _ -> response.set_header(resp, "etag", etag)
+                  }
+                }
+                // set etag header
+                _ -> response.set_header(resp, "etag", etag)
+              }
+            }
             False -> resp
           }
         }
