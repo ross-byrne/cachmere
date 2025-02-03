@@ -1,9 +1,7 @@
 import cachmere/internal
 import gleam/http
-import gleam/http/request
 import gleam/http/response
 import gleam/list
-import gleam/order
 import gleam/result
 import gleam/string
 import marceau
@@ -140,7 +138,7 @@ pub fn serve_static_with(
   from directory: String,
   options options: ServeStaticOptions,
   next handler: fn() -> Response,
-) {
+) -> Response {
   let path = internal.remove_preceeding_slashes(req.path)
   let prefix = internal.remove_preceeding_slashes(prefix)
   case req.method, string.starts_with(path, prefix) {
@@ -178,22 +176,7 @@ pub fn serve_static_with(
 
           // Handle etag generation
           case options.etags {
-            True -> {
-              let assert Ok(etag) = internal.generate_etag(path)
-              case request.get_header(req, "if-none-match") {
-                // Compare old etag to current one
-                Ok(old_etag) -> {
-                  case string.compare(old_etag, etag) {
-                    // etags match, return status 304
-                    order.Eq -> wisp.response(304)
-                    // didn't match, return file with new etag
-                    _ -> response.set_header(resp, "etag", etag)
-                  }
-                }
-                // set etag header
-                _ -> response.set_header(resp, "etag", etag)
-              }
-            }
+            True -> internal.handle_etag(req, resp, path)
             False -> resp
           }
         }
