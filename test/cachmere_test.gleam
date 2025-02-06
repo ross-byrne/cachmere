@@ -1,4 +1,5 @@
 import cachmere
+import common/common
 import gleam/http/request
 import gleeunit
 import gleeunit/should
@@ -20,45 +21,28 @@ pub fn serve_static_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "text/plain; charset=utf-8")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.txt"))
+  common.expect_txt_file_with_status_ok(response)
 
   // Get a json file
   let response =
     testing.get("/stuff/test/fixtures/fixture.json", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "application/json; charset=utf-8")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.json"))
+  common.expect_json_file_with_status_ok(response)
 
   // Get some other file
   let response =
     testing.get("/stuff/test/fixtures/fixture.dat", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "application/octet-stream")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.dat"))
+  common.expect_data_file_with_status_ok(response)
 
   // Get something not handled by the static file server
   let response =
     testing.get("/stuff/this-does-not-exist", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([])
-  response.body
-  |> should.equal(wisp.Empty)
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [])
+  should.equal(response.body, wisp.Empty)
 }
 
 pub fn serve_static_under_has_no_trailing_slash_test() {
@@ -69,12 +53,8 @@ pub fn serve_static_under_has_no_trailing_slash_test() {
     use <- cachmere.serve_static(request, under: "stuff", from: "./")
     wisp.ok()
   }
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "text/plain; charset=utf-8")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.txt"))
+
+  common.expect_txt_file_with_status_ok(response)
 }
 
 pub fn serve_static_from_has_no_trailing_slash_test() {
@@ -85,12 +65,8 @@ pub fn serve_static_from_has_no_trailing_slash_test() {
     use <- cachmere.serve_static(request, under: "stuff", from: ".")
     wisp.ok()
   }
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "text/plain; charset=utf-8")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.txt"))
+
+  common.expect_txt_file_with_status_ok(response)
 }
 
 pub fn serve_static_not_found_test() {
@@ -134,45 +110,28 @@ pub fn serve_static_with_default_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "text/plain; charset=utf-8")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.txt"))
+  common.expect_txt_file_with_status_ok(response)
 
   // Get a json file
   let response =
     testing.get("/stuff/test/fixtures/fixture.json", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "application/json; charset=utf-8")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.json"))
+  common.expect_json_file_with_status_ok(response)
 
   // Get some other file
   let response =
     testing.get("/stuff/test/fixtures/fixture.dat", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "application/octet-stream")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.dat"))
+  common.expect_data_file_with_status_ok(response)
 
   // Get something not handled by the static file server
   let response =
     testing.get("/stuff/this-does-not-exist", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([])
-  response.body
-  |> should.equal(wisp.Empty)
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [])
+  should.equal(response.body, wisp.Empty)
 }
 
 pub fn serve_static_with_applies_to_correct_file_test() {
@@ -194,51 +153,40 @@ pub fn serve_static_with_applies_to_correct_file_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
     #("content-type", "text/plain; charset=utf-8"),
     #("cache-control", "immutable"),
   ])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.txt"))
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
 
   // Get a json file
   let response =
     testing.get("/stuff/test/fixtures/fixture.json", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
     #("content-type", "application/json; charset=utf-8"),
     #("cache-control", "immutable"),
   ])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.json"))
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.json"))
 
   // Get some other file
   let response =
     testing.get("/stuff/test/fixtures/fixture.dat", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([#("content-type", "application/octet-stream")])
-  response.body
-  |> should.equal(wisp.File("./test/fixtures/fixture.dat"))
+  common.expect_data_file_with_status_ok(response)
 
   // Get something not handled by the static file server
   let response =
     testing.get("/stuff/this-does-not-exist", [])
     |> handler
-  response.status
-  |> should.equal(200)
-  response.headers
-  |> should.equal([])
-  response.body
-  |> should.equal(wisp.Empty)
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [])
+  should.equal(response.body, wisp.Empty)
 }
 
 pub fn default_cache_settings_test() {
