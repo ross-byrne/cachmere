@@ -15,8 +15,7 @@ pub fn middleware(
   use <- wisp.rescue_crashes
   use req <- wisp.handle_head(req)
 
-  // Serve static files using cachmeres default cache settings
-  // default_cache_settings() adds a config with cache-control response headers
+  // Serve static files using etags
   use <- cachmere.serve_static_with(
     req,
     under: "/static",
