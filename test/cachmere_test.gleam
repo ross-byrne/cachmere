@@ -39,10 +39,7 @@ pub fn serve_static_test() {
   let response =
     testing.get("/stuff/this-does-not-exist", [])
     |> handler
-
-  should.equal(response.status, 200)
-  should.equal(response.headers, [])
-  should.equal(response.body, wisp.Empty)
+  common.expect_empty_response_with_status_ok(response)
 }
 
 pub fn serve_static_under_has_no_trailing_slash_test() {
@@ -91,6 +88,18 @@ pub fn serve_static_go_up_test() {
   |> should.equal(wisp.ok())
 }
 
+pub fn default_cache_settings_test() {
+  let result = cachmere.default_cache_settings()
+  let expected =
+    cachmere.ServeStaticOptions(
+      etags: False,
+      file_types: ["js", "css"],
+      response_headers: [#("cache-control", "max-age=31536000, immutable")],
+    )
+
+  should.equal(result, expected)
+}
+
 pub fn serve_static_with_default_test() {
   let handler = fn(request) {
     use <- cachmere.serve_static_with(
@@ -128,10 +137,7 @@ pub fn serve_static_with_default_test() {
   let response =
     testing.get("/stuff/this-does-not-exist", [])
     |> handler
-
-  should.equal(response.status, 200)
-  should.equal(response.headers, [])
-  should.equal(response.body, wisp.Empty)
+  common.expect_empty_response_with_status_ok(response)
 }
 
 pub fn serve_static_with_applies_to_correct_file_test() {
@@ -183,20 +189,183 @@ pub fn serve_static_with_applies_to_correct_file_test() {
   let response =
     testing.get("/stuff/this-does-not-exist", [])
     |> handler
+  common.expect_empty_response_with_status_ok(response)
+}
+
+pub fn serve_static_with_etags_test() {
+  let handler = fn(request) {
+    use <- cachmere.serve_static_with(
+      request,
+      under: "/stuff",
+      from: "./",
+      options: cachmere.ServeStaticOptions(
+        etags: True,
+        response_headers: [],
+        file_types: [],
+      ),
+    )
+    wisp.ok()
+  }
+
+  // Get a text file
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [])
+    |> handler
 
   should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "text/plain; charset=utf-8"),
+    #("etag", "0-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
+
+  // Get a json file
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.json", [])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "application/json; charset=utf-8"),
+    #("etag", "3-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.json"))
+
+  // Get some other file
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.dat", [])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "application/octet-stream"),
+    #("etag", "0-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.dat"))
+
+  // Get something not handled by the static file server
+  let response =
+    testing.get("/stuff/this-does-not-exist", [])
+    |> handler
+  common.expect_empty_response_with_status_ok(response)
+}
+
+pub fn serve_static_with_etags_returns_304_test() {
+  let handler = fn(request) {
+    use <- cachmere.serve_static_with(
+      request,
+      under: "/stuff",
+      from: "./",
+      options: cachmere.ServeStaticOptions(
+        etags: True,
+        response_headers: [],
+        file_types: [],
+      ),
+    )
+    wisp.ok()
+  }
+
+  // Get a text file without any headers
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "text/plain; charset=utf-8"),
+    #("etag", "0-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
+
+  // Get a text file with outdated if-none-match header
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [
+      #("if-none-match", "invalid-etag"),
+    ])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "text/plain; charset=utf-8"),
+    #("etag", "0-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
+
+  // Get a text file with current etag in if-none-match header
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [
+      #("if-none-match", "0-678CFAB2"),
+    ])
+    |> handler
+
+  should.equal(response.status, 304)
   should.equal(response.headers, [])
   should.equal(response.body, wisp.Empty)
 }
 
-pub fn default_cache_settings_test() {
-  let result = cachmere.default_cache_settings()
-  let expected =
-    cachmere.ServeStaticOptions(
-      etags: False,
-      file_types: ["js", "css"],
-      response_headers: [#("cache-control", "max-age=31536000, immutable")],
+pub fn serve_static_with_etags_and_custom_headers_test() {
+  let handler = fn(request) {
+    use <- cachmere.serve_static_with(
+      request,
+      under: "/stuff",
+      from: "./",
+      options: cachmere.ServeStaticOptions(
+        etags: True,
+        response_headers: [#("cache-control", "max-age=604800")],
+        file_types: ["txt"],
+      ),
     )
+    wisp.ok()
+  }
 
-  should.equal(result, expected)
+  // Get a text file without any headers
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "text/plain; charset=utf-8"),
+    #("cache-control", "max-age=604800"),
+    #("etag", "0-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
+
+  // Get a text file with outdated if-none-match header
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [
+      #("if-none-match", "invalid-etag"),
+    ])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "text/plain; charset=utf-8"),
+    #("cache-control", "max-age=604800"),
+    #("etag", "0-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
+
+  // Get a text file with current etag in if-none-match header
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.txt", [
+      #("if-none-match", "0-678CFAB2"),
+    ])
+    |> handler
+
+  should.equal(response.status, 304)
+  should.equal(response.headers, [])
+  should.equal(response.body, wisp.Empty)
+
+  // Get a json file, custom header should not be applied
+  let response =
+    testing.get("/stuff/test/fixtures/fixture.json", [])
+    |> handler
+
+  should.equal(response.status, 200)
+  should.equal(response.headers, [
+    #("content-type", "application/json; charset=utf-8"),
+    #("etag", "3-678CFAB2"),
+  ])
+  should.equal(response.body, wisp.File("./test/fixtures/fixture.json"))
 }
