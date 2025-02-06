@@ -22,3 +22,9 @@ pub fn expect_data_file_with_status_ok(response: wisp.Response) {
   should.equal(response.headers, [#("content-type", "application/octet-stream")])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.dat"))
 }
+
+pub fn expect_empty_response_with_status_ok(response: wisp.Response) {
+  should.equal(response.status, 200)
+  should.equal(response.headers, [])
+  should.equal(response.body, wisp.Empty)
+}
