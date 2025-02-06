@@ -51,23 +51,21 @@ pub fn generate_etag(path: String) -> Result(String, simplifile.FileError) {
 
 /// Calculates etag for requested file and then checks for the request header `if-none-match`.
 ///
-/// If the header isn't present, it returns the file with it's etag. If the header is present,
+/// If the header isn't present, it returns the file with a generated etag. If the header is present,
 /// it compares the old etag with the new one and returns the file with the new etag if they don't match.
 ///
-/// Otherwise it returns status 304 without the file, allowing the broswer to use the cached version.
+/// Otherwise it returns status 304 without the file, allowing the browser to use the cached version.
 ///
 pub fn handle_etag(req: Request, resp: Response, path: String) -> Response {
   case generate_etag(path) {
     Ok(etag) -> {
       case request.get_header(req, "if-none-match") {
-        // Compare old etag to current one
         Ok(old_etag) -> {
           case string.compare(old_etag, etag) {
             order.Eq -> wisp.response(304)
             _ -> response.set_header(resp, "etag", etag)
           }
         }
-        // set etag header
         _ -> response.set_header(resp, "etag", etag)
       }
     }
