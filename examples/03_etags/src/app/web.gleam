@@ -24,7 +24,7 @@ pub fn middleware(
     options: cachmere.ServeStaticOptions(
       etags: True,
       response_headers: [],
-      file_types: ["js", "css"],
+      file_types: [],
     ),
   )
 
