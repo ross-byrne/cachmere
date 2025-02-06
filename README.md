@@ -9,7 +9,7 @@ Currently a work-in-progress. Breaking changes may be made to API.
 
 ## Roadmap
 - [x] Add response header control, to allow for browser caching of assets
-- [ ] Add support for ETags
+- [x] Add support for ETags
 
 ## Development
 ```sh
