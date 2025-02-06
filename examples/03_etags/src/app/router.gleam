@@ -6,7 +6,7 @@ const html = "<!DOCTYPE html>
 <html lang=\"en\">
   <head>
     <meta charset=\"utf-8\">
-    <title>Serving Static Assets With Config Example</title>
+    <title>Serving Static Assets With ETags Example</title>
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
     <link rel=\"stylesheet\" href=\"/static/styles.css\">
     <script src=\"/static/main.js\"></script>
