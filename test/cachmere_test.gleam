@@ -1,4 +1,5 @@
 import cachmere
+import cachmere/internal
 import common/common
 import gleam/http/request
 import gleeunit
@@ -211,11 +212,12 @@ pub fn serve_static_with_etags_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [])
     |> handler
+  let assert Ok(etag) = internal.generate_etag("test/fixtures/fixture.txt")
 
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "text/plain; charset=utf-8"),
-    #("etag", "0-678CFAB2"),
+    #("etag", etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
 
@@ -223,11 +225,12 @@ pub fn serve_static_with_etags_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.json", [])
     |> handler
+  let assert Ok(etag) = internal.generate_etag("test/fixtures/fixture.json")
 
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "application/json; charset=utf-8"),
-    #("etag", "3-678CFAB2"),
+    #("etag", etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.json"))
 
@@ -235,11 +238,12 @@ pub fn serve_static_with_etags_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.dat", [])
     |> handler
+  let assert Ok(etag) = internal.generate_etag("test/fixtures/fixture.dat")
 
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "application/octet-stream"),
-    #("etag", "0-678CFAB2"),
+    #("etag", etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.dat"))
 
@@ -269,11 +273,12 @@ pub fn serve_static_with_etags_returns_304_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [])
     |> handler
+  let assert Ok(txt_etag) = internal.generate_etag("test/fixtures/fixture.txt")
 
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "text/plain; charset=utf-8"),
-    #("etag", "0-678CFAB2"),
+    #("etag", txt_etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
 
@@ -287,14 +292,14 @@ pub fn serve_static_with_etags_returns_304_test() {
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "text/plain; charset=utf-8"),
-    #("etag", "0-678CFAB2"),
+    #("etag", txt_etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
 
   // Get a text file with current etag in if-none-match header
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [
-      #("if-none-match", "0-678CFAB2"),
+      #("if-none-match", txt_etag),
     ])
     |> handler
 
@@ -322,12 +327,13 @@ pub fn serve_static_with_etags_and_custom_headers_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [])
     |> handler
+  let assert Ok(txt_etag) = internal.generate_etag("test/fixtures/fixture.txt")
 
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "text/plain; charset=utf-8"),
     #("cache-control", "max-age=604800"),
-    #("etag", "0-678CFAB2"),
+    #("etag", txt_etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
 
@@ -342,14 +348,14 @@ pub fn serve_static_with_etags_and_custom_headers_test() {
   should.equal(response.headers, [
     #("content-type", "text/plain; charset=utf-8"),
     #("cache-control", "max-age=604800"),
-    #("etag", "0-678CFAB2"),
+    #("etag", txt_etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.txt"))
 
   // Get a text file with current etag in if-none-match header
   let response =
     testing.get("/stuff/test/fixtures/fixture.txt", [
-      #("if-none-match", "0-678CFAB2"),
+      #("if-none-match", txt_etag),
     ])
     |> handler
 
@@ -361,11 +367,13 @@ pub fn serve_static_with_etags_and_custom_headers_test() {
   let response =
     testing.get("/stuff/test/fixtures/fixture.json", [])
     |> handler
+  let assert Ok(json_etag) =
+    internal.generate_etag("test/fixtures/fixture.json")
 
   should.equal(response.status, 200)
   should.equal(response.headers, [
     #("content-type", "application/json; charset=utf-8"),
-    #("etag", "3-678CFAB2"),
+    #("etag", json_etag),
   ])
   should.equal(response.body, wisp.File("./test/fixtures/fixture.json"))
 }
