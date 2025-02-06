@@ -37,13 +37,16 @@ pub fn set_headers(headers: List(#(String, String)), resp: Response) -> Response
   }
 }
 
-/// Generates etag using file size + file mtime in micro seconds
+/// Generates etag using file size + file mtime as seconds
 ///
-/// Exmaple etag value: `2C-62D123DB1FD00`
+/// Exmaple etag value: `2C-67A4D2F1`
 pub fn generate_etag(path: String) -> Result(String, simplifile.FileError) {
   use file_info <- result.try(simplifile.file_info(path))
-  let micro_seconds = file_info.mtime_seconds * 1_000_000
-  Ok(int.to_base16(file_info.size) <> "-" <> int.to_base16(micro_seconds))
+  Ok(
+    int.to_base16(file_info.size)
+    <> "-"
+    <> int.to_base16(file_info.mtime_seconds),
+  )
 }
 
 /// Calculates etag for requested file and then checks for the request header `if-none-match`.
