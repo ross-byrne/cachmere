@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.2.0
 - Added examples demonstrating how to use the package
+- Added support for etags
 
 ## v0.1.0
 First release!
