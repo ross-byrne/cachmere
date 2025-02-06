@@ -26,10 +26,6 @@ pub fn main() {
 }
 
 pub fn static_directory() -> String {
-  // The priv directory is where we store non-Gleam and non-Erlang files,
-  // including static assets to be served.
-  // This function returns an absolute path and works both in development and in
-  // production after compilation.
   let assert Ok(priv_directory) = wisp.priv_directory("app")
   priv_directory <> "/static"
 }
