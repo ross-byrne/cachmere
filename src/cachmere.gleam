@@ -10,11 +10,13 @@ import wisp.{type Request, type Response, File, response}
 
 /// Options for `serve_static_with`.
 ///
+/// - `etags` is a boolean that enables the use of entity tags. Enabling this will generate etags for all files served
+/// from the location passed to `serve_static_with`.
 /// - `response_headers` is a list of response headers, in a tuple format. eg. "cache-control": "max-age=31536000".
 /// - `file_types` is a list of file types to apply the defined response headers to.
 /// This allows you to control the headers, such as cache-control, on a per file type basis.
 /// Unlisted file types will still be served but they won't have the headers defined in `response_headers` applied to them.
-/// An empty list will result in identical behaviour to `cachmere.serve_static`.
+/// An empty list will result in identical behaviour to `serve_static`.
 ///
 pub type ServeStaticOptions {
   ServeStaticOptions(
@@ -29,6 +31,7 @@ pub type ServeStaticOptions {
 /// # Default Settings
 /// ```gleam
 /// ServeStaticOptions(
+///   etags: False,
 ///   file_types: ["js", "css"],
 ///   response_headers: [#("cache-control", "max-age=31536000, immutable")]
 /// )
@@ -69,7 +72,7 @@ pub fn default_cache_settings() -> ServeStaticOptions {
 /// }
 /// ```
 ///
-/// Typically you static assets may be kept in your project in a directory
+/// Typically your static assets may be kept in your project in a directory
 /// called `priv`. The `priv_directory` function can be used to get a path to
 /// this directory.
 ///
@@ -101,10 +104,12 @@ pub fn serve_static(
   )
 }
 
-/// Functions the same as `serve_static` but takes options for setting response headers for specific file types.
+/// Functions the same as `serve_static` but takes options for enabling etags and setting response headers for specific file types.
 /// This allows for configuring headers such as Cache-Control etc.
 ///
 /// # Examples
+/// Serve files from static folder and apply cache-control header to `.js` and `.css` files.
+/// All other file will be served but they won't have the defined response headers added to them.
 /// ```gleam
 /// fn handle_request(req: Request) -> Response {
 ///   let assert Ok(priv) = priv_directory("my_application")
@@ -113,6 +118,7 @@ pub fn serve_static(
 ///     under: "/static",
 ///     from: priv,
 ///     options: cachmere.ServeStaticOptions(
+///       etags: False,
 ///       file_types: ["js", "css"],
 ///       response_headers: [#("cache-control", "max-age=31536000, immutable")],
 ///     ),
@@ -121,16 +127,24 @@ pub fn serve_static(
 /// }
 /// ```
 ///
-/// ## ServeStaticOptions
-/// The options for `cachmere.ServeStaticOptions` are as follows:
-///
-/// - `response_headers` is a list of response headers, in a tuple format. eg. "cache-control": "max-age=31536000".
-/// - `file_types` is a list of file types to apply the defined response headers to.
-/// This allows you to control the headers, such as cache-control, on a per file type basis.
-/// Unlisted file types will still be served but they won't have the headers defined in `response_headers` applied to them.
-/// An empty list will result in identical behaviour to `cachmere.serve_static`.
-///
-/// See: `cachmere.default_cache_settings()` for a default config for caching.
+/// Serve files from static folder using etags. If files have not been edited, `serve_static_with`
+/// will return a status 304 allowing the browser to use the cached version of the file.
+/// ```gleam
+/// fn handle_request(req: Request) -> Response {
+///   let assert Ok(priv) = priv_directory("my_application")
+///   use <- cachmere.serve_static_with(
+///     req,
+///     under: "/static",
+///     from: priv,
+///     options: cachmere.ServeStaticOptions(
+///       etags: True,
+///       file_types: [],
+///       response_headers: [],
+///     ),
+///   )
+///   // ...
+/// }
+/// ```
 ///
 pub fn serve_static_with(
   req: Request,
