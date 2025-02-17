@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.2
+
+- Updated dependencies to more closely match Wisp
+
 ## v0.2.1
 
 - Updated documentation
