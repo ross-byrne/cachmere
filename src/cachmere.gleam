@@ -22,10 +22,11 @@ pub type ServeStaticOptions {
 }
 
 /// Options for adding response headers to a statically served file
-/// Variant `ResponseHeaders` takes a list of response headers, in tuple format. eg. "cache-control": "max-age=31536000".
+///
+/// - Variant `ResponseHeaders` takes a list of response headers, in tuple format. eg. "cache-control": "max-age=31536000".
 /// Headers defined will be added to all statically served files. An empty list will result in identical behaviour to `serve_static`.
 ///
-/// Variant `ResponseHeadersFor` allows for filtering by file type. It takes a list of response header and a list of file types.
+/// - Variant `ResponseHeadersFor` allows for filtering by file type. It takes a list of response header and a list of file types.
 /// eg. ["js", "css"]. Response headers will only be added to files with the same file type.
 /// Unlisted file types will still be served but they won't have the headers defined in `headers` applied to them.
 ///
