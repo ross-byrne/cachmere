@@ -19,11 +19,12 @@ import wisp.{type Request, type Response, File, response}
 /// An empty list will result in identical behaviour to `serve_static`.
 ///
 pub type ServeStaticOptions {
-  ServeStaticOptions(
-    etags: Bool,
-    response_headers: List(#(String, String)),
-    file_types: List(String),
-  )
+  ServeStaticOptions(etags: Bool, response_headers: ResponseHeaderOptions)
+}
+
+pub type ResponseHeaderOptions {
+  ResponseHeaders(List(#(String, String)))
+  ResponseHeadersFor(headers: List(#(String, String)), file_types: List(String))
 }
 
 /// Returns `ServeStaticOptions` with a default config for caching
@@ -38,9 +39,13 @@ pub type ServeStaticOptions {
 /// ```
 ///
 pub fn default_cache_settings() -> ServeStaticOptions {
-  ServeStaticOptions(etags: False, file_types: ["js", "css"], response_headers: [
-    #("cache-control", "max-age=31536000, immutable"),
-  ])
+  ServeStaticOptions(
+    etags: False,
+    response_headers: ResponseHeadersFor(
+      headers: [#("cache-control", "max-age=31536000, immutable, private")],
+      file_types: ["js", "css"],
+    ),
+  )
 }
 
 /// A middleware function that serves files from a directory, along with a
@@ -97,8 +102,7 @@ pub fn serve_static(
     from: directory,
     options: ServeStaticOptions(
       etags: False,
-      file_types: [],
-      response_headers: [],
+      response_headers: ResponseHeaders([]),
     ),
     next: handler,
   )
@@ -182,10 +186,17 @@ pub fn serve_static_with(
             |> response.set_header("content-type", content_type)
             |> response.set_body(File(path))
 
-          // Check if file type is in options
-          let resp = case list.contains(options.file_types, file_type) {
-            True -> internal.set_headers(options.response_headers, resp)
-            False -> resp
+          // Handle Response headers
+          let resp = case options.response_headers {
+            // Add defined headers to response
+            ResponseHeaders(headers) -> internal.set_headers(headers, resp)
+            // check if file type matches, then add headers accordingly
+            // if file type doesn't match, pass through response unedited
+            ResponseHeadersFor(headers, file_types) ->
+              case list.contains(file_types, file_type) {
+                True -> internal.set_headers(headers, resp)
+                False -> resp
+              }
           }
 
           // Handle etag generation
