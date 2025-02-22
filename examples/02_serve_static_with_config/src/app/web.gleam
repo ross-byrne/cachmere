@@ -15,7 +15,7 @@ pub fn middleware(
   use <- wisp.rescue_crashes
   use req <- wisp.handle_head(req)
 
-  // Serve static files settings to add cache-control response headers to js and css files
+  // Serve static files with settings to add cache-control response headers to js and css files
   use <- cachmere.serve_static_with(
     req,
     under: "/static",
