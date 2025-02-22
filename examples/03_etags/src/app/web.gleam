@@ -22,8 +22,7 @@ pub fn middleware(
     from: ctx.static_directory,
     options: cachmere.ServeStaticOptions(
       etags: True,
-      response_headers: [],
-      file_types: [],
+      response_headers: cachmere.ResponseHeaders([]),
     ),
   )
 
