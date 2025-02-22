@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.0
+
+- **Breaking Change:** Added new options type for configuring `serve_static_with`.
+
 ## v0.2.2
 
 - Updated dependencies to more closely match Wisp

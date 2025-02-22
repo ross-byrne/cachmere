@@ -12,16 +12,23 @@ import wisp.{type Request, type Response, File, response}
 ///
 /// - `etags` is a boolean that enables the use of entity tags. Enabling this will generate etags for all files served
 /// from the location passed to `serve_static_with`.
-/// - `response_headers` is a list of response headers, in a tuple format. eg. "cache-control": "max-age=31536000".
-/// - `file_types` is a list of file types to apply the defined response headers to.
-/// This allows you to control the headers, such as cache-control, on a per file type basis.
-/// Unlisted file types will still be served but they won't have the headers defined in `response_headers` applied to them.
-/// An empty list will result in identical behaviour to `serve_static`.
+/// - `response_headers` is a `ResponseHeaderOptions` type. This allows for defining a list of response headers, in a tuple format. eg. "cache-control": "max-age=31536000".
+/// As well as optionally filtering by file type. Giving you control over which file types get the supplied headers added to them.
+///
+/// See `ResponseHeaderOptions` type for more details.
 ///
 pub type ServeStaticOptions {
   ServeStaticOptions(etags: Bool, response_headers: ResponseHeaderOptions)
 }
 
+/// Options for adding response headers to a statically served file
+/// Variant `ResponseHeaders` takes a list of response headers, in tuple format. eg. "cache-control": "max-age=31536000".
+/// Headers defined will be added to all statically served files. An empty list will result in identical behaviour to `serve_static`.
+///
+/// Variant `ResponseHeadersFor` allows for filtering by file type. It takes a list of response header and a list of file types.
+/// eg. ["js", "css"]. Response headers will only be added to files with the same file type.
+/// Unlisted file types will still be served but they won't have the headers defined in `headers` applied to them.
+///
 pub type ResponseHeaderOptions {
   ResponseHeaders(List(#(String, String)))
   ResponseHeadersFor(headers: List(#(String, String)), file_types: List(String))
@@ -33,8 +40,10 @@ pub type ResponseHeaderOptions {
 /// ```gleam
 /// ServeStaticOptions(
 ///   etags: False,
-///   file_types: ["js", "css"],
-///   response_headers: [#("cache-control", "max-age=31536000, immutable")]
+///   response_headers: ResponseHeadersFor(
+///     headers: [#("cache-control", "max-age=31536000, immutable, private")],
+///     file_types: ["js", "css"],
+///   ),
 /// )
 /// ```
 ///
@@ -123,8 +132,10 @@ pub fn serve_static(
 ///     from: priv,
 ///     options: cachmere.ServeStaticOptions(
 ///       etags: False,
-///       file_types: ["js", "css"],
-///       response_headers: [#("cache-control", "max-age=31536000, immutable")],
+///       response_headers: cachmere.ResponseHeadersFor(
+///         headers: [#("cache-control", "max-age=31536000, immutable, private")],
+///         file_types: ["js", "css"],
+///       ),
 ///     ),
 ///   )
 ///   // ...
@@ -142,8 +153,7 @@ pub fn serve_static(
 ///     from: priv,
 ///     options: cachmere.ServeStaticOptions(
 ///       etags: True,
-///       file_types: [],
-///       response_headers: [],
+///       response_headers: cachmere.ResponseHeaders([]),
 ///     ),
 ///   )
 ///   // ...
