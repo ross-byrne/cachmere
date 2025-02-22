@@ -15,13 +15,18 @@ pub fn middleware(
   use <- wisp.rescue_crashes
   use req <- wisp.handle_head(req)
 
-  // Serve static files using cachmeres default cache settings
-  // default_cache_settings() adds a config with cache-control response headers
+  // Serve static files settings to add cache-control response headers to js and css files
   use <- cachmere.serve_static_with(
     req,
     under: "/static",
     from: ctx.static_directory,
-    options: cachmere.default_cache_settings(),
+    options: cachmere.ServeStaticOptions(
+      etags: False,
+      response_headers: cachmere.ResponseHeadersFor(
+        headers: [#("cache-control", "max-age=31536000, immutable, private")],
+        file_types: ["js", "css"],
+      ),
+    ),
   )
 
   handle_request(req)
