@@ -94,8 +94,10 @@ pub fn default_cache_settings_test() {
   let expected =
     cachmere.ServeStaticOptions(
       etags: False,
-      file_types: ["js", "css"],
-      response_headers: [#("cache-control", "max-age=31536000, immutable")],
+      response_headers: cachmere.ResponseHeadersFor(
+        file_types: ["js", "css"],
+        headers: [#("cache-control", "max-age=31536000, immutable, private")],
+      ),
     )
 
   should.equal(result, expected)
@@ -109,8 +111,7 @@ pub fn serve_static_with_default_test() {
       from: "./",
       options: cachmere.ServeStaticOptions(
         etags: False,
-        response_headers: [],
-        file_types: [],
+        response_headers: cachmere.ResponseHeaders([]),
       ),
     )
     wisp.ok()
@@ -149,8 +150,10 @@ pub fn serve_static_with_applies_to_correct_file_test() {
       from: "./",
       options: cachmere.ServeStaticOptions(
         etags: False,
-        response_headers: [#("cache-control", "immutable")],
-        file_types: ["txt", "json"],
+        response_headers: cachmere.ResponseHeadersFor(
+          file_types: ["txt", "json"],
+          headers: [#("cache-control", "immutable")],
+        ),
       ),
     )
     wisp.ok()
@@ -201,8 +204,7 @@ pub fn serve_static_with_etags_test() {
       from: "./",
       options: cachmere.ServeStaticOptions(
         etags: True,
-        response_headers: [],
-        file_types: [],
+        response_headers: cachmere.ResponseHeaders([]),
       ),
     )
     wisp.ok()
@@ -262,8 +264,7 @@ pub fn serve_static_with_etags_returns_304_test() {
       from: "./",
       options: cachmere.ServeStaticOptions(
         etags: True,
-        response_headers: [],
-        file_types: [],
+        response_headers: cachmere.ResponseHeaders([]),
       ),
     )
     wisp.ok()
@@ -316,8 +317,10 @@ pub fn serve_static_with_etags_and_custom_headers_test() {
       from: "./",
       options: cachmere.ServeStaticOptions(
         etags: True,
-        response_headers: [#("cache-control", "max-age=604800")],
-        file_types: ["txt"],
+        response_headers: cachmere.ResponseHeadersFor(
+          file_types: ["txt"],
+          headers: [#("cache-control", "max-age=604800")],
+        ),
       ),
     )
     wisp.ok()
