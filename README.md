@@ -3,6 +3,11 @@
 [![Package Version](https://img.shields.io/hexpm/v/cachmere)](https://hex.pm/packages/cachmere)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/cachmere/)
 
+> [!NOTE]
+> This package is no longer maintained. Some parts of this have been upstreamed
+> into wisp. `wisp.serve_static` now generates etags for all statically served
+> assets. See PR [here](https://github.com/gleam-wisp/wisp/pull/113).
+
 A caching solution for Gleam web apps, designed to be used with Wisp. Currently
 a work-in-progress. Breaking changes may be made to the API.
 
