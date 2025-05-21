@@ -1,5 +1,5 @@
 name = "cachmere"
-version = "0.3.0"
+version = "0.3.1"
 gleam = ">= 1.9.0"
 description = "A caching solution for Gleam web apps, designed to be used with Wisp."
 licences = ["Apache-2.0"]

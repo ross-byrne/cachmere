@@ -1,8 +1,16 @@
 # Changelog
 
+## v0.3.1
+
+- Added deprecation warnings. Wisp now uses etags for all assets served with
+  `wisp.serve_static`. While not a one to one replacement, it solves the general
+  problem.
+- Updated dependencies
+
 ## v0.3.0
 
-- **Breaking Change:** Added new options type for configuring `serve_static_with`.
+- **Breaking Change:** Added new options type for configuring
+  `serve_static_with`.
 
 ## v0.2.2
 
