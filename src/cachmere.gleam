@@ -6,7 +6,7 @@ import gleam/result
 import gleam/string
 import marceau
 import simplifile
-import wisp.{type Request, type Response, File, response}
+import wisp.{type Request, type Response, File}
 
 /// Options for `serve_static_with`.
 ///
@@ -48,6 +48,7 @@ pub type ResponseHeaderOptions {
 /// )
 /// ```
 ///
+@deprecated("Use wisp.serve_static instead of serve_static_with")
 pub fn default_cache_settings() -> ServeStaticOptions {
   ServeStaticOptions(
     etags: False,
@@ -99,6 +100,7 @@ pub fn default_cache_settings() -> ServeStaticOptions {
 /// }
 /// ```
 ///
+@deprecated("Use wisp.serve_static instead")
 pub fn serve_static(
   req: Request,
   under prefix: String,
@@ -161,6 +163,7 @@ pub fn serve_static(
 /// }
 /// ```
 ///
+@deprecated("Use wisp.serve_static instead")
 pub fn serve_static_with(
   req: Request,
   under prefix: String,
