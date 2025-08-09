@@ -2,7 +2,7 @@
 
 ## v0.3.2
 
-- Updated dependancies
+- Updated dependencies
 
 ## v0.3.1
 
