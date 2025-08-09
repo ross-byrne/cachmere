@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.2
+
+- Updated dependancies
+
 ## v0.3.1
 
 - Added deprecation warnings. Wisp now uses etags for all assets served with

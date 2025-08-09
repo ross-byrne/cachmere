@@ -7,6 +7,9 @@
 > This package is no longer maintained. Some parts of this have been upstreamed
 > into wisp. `wisp.serve_static` now generates etags for all statically served
 > assets. See PR [here](https://github.com/gleam-wisp/wisp/pull/113).
+>
+> I'm planning on working on future updates when I have time. Until then, this
+> package isn't that useful.
 
 A caching solution for Gleam web apps, designed to be used with Wisp. Currently
 a work-in-progress. Breaking changes may be made to the API.
