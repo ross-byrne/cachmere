@@ -1,13 +1,13 @@
 name = "cachmere"
-version = "0.3.1"
-gleam = ">= 1.9.0"
+version = "0.3.2"
+gleam = ">= 1.11.0"
 description = "A caching solution for Gleam web apps, designed to be used with Wisp."
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "ross-byrne", repo = "cachmere" }
 target = "erlang"
 
 [dependencies]
-gleam_stdlib = ">= 0.43.0 and < 2.0.0"
+gleam_stdlib = ">= 0.50.0 and < 2.0.0"
 wisp = ">= 1.5.1 and < 2.0.0"
 marceau = ">= 1.1.0 and < 2.0.0"
 simplifile = ">= 2.0.0 and < 3.0.0"
